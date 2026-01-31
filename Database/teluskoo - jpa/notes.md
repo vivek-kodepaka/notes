@@ -41,6 +41,8 @@
 
 ### spring -jdbc
 
+git: https://github.com/vivek-kodepaka/spring-jdbc
+
 - ```xml
 <dependency>
             <groupId>org.springframework.boot</groupId>
@@ -53,3 +55,19 @@
         </dependency>
 ```
 
+## JdbcTemplate
+- JdbcTemplate simplifies JDBC by removing boilerplate (connections, statements, closing, exceptions).
+- JdbcTemplate is the core component that simplifies the interaction with the database  in a Spring-based application.
+
+
+## methods
+
+| Method           | Use case                       | Returns   | Example       |
+| ---------------- | ------------------------------ | --------- | ------------- |
+| queryForObject() | single value/row               | Object    | count, salary |
+| queryForList()   | multiple rows (map)            | List<Map> | quick fetch   |
+| query()          | multiple rows (custom mapping) | List<T>   | best practice |
+| update()         | insert/update/delete           | int       | DML           |
+| batchUpdate()    | bulk operations                | int[]     | batch insert  |
+| execute()        | DDL/raw SQL                    | void      | create table  |
+| queryForMap()    | single row map                 | Map       | one record    |
