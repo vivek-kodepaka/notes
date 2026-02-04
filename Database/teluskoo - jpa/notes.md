@@ -71,3 +71,47 @@ git: https://github.com/vivek-kodepaka/spring-jdbc
 | batchUpdate()    | bulk operations                | int[]     | batch insert  |
 | execute()        | DDL/raw SQL                    | void      | create table  |
 | queryForMap()    | single row map                 | Map       | one record    |
+
+
+## application.properties
+
+```xml
+spring.application.name=spring jdbc
+spring.sql.init.schema-locations=classpath:schema.sql
+spring.sql.init.data-locations=classpath:data.sql
+spring.sql.init.mode=always
+spring.datasource.url=jdbc:mysql://localhost:3306/spring_jdbc
+spring.datasource.username=root
+spring.datasource.password=root
+```
+
+##  fetch ,insert
+return jdbcTemplate.query(fetch, (rs, rowNum) -> new Student(rs.getInt(1),rs.getString(2),rs.getInt(3)));
+
+jdbcTemplate.update(insertQuery,student.getId(),student.getName(),student.getAge());
+      
+
+## Row mapper
+
+
+
+-----------------------------------------------------------------------------------------------
+
+### Hibernate
+
+
+## dependencies
+
+```xml
+ <dependency>
+            <groupId>com.microsoft.sqlserver</groupId>
+            <artifactId>mssql-jdbc</artifactId>
+            <scope>runtime</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.hibernate</groupId>
+            <artifactId>hibernate-core</artifactId>
+            <version>7.1.14.Final</version>
+        </dependency>
+```
+
