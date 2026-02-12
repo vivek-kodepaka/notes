@@ -1,8 +1,6 @@
+span
 
 <details>
-<summary> 1. Fundamentals </summary>
-
-   <details>
     <summary>what is micro service</summary>
 
 ```text
@@ -11,6 +9,7 @@
       2. have their own database
       3. communicate over network (REST, messaging)
 ```
+
 </details>
 
 <details>
@@ -25,6 +24,7 @@
 | Failure    | Whole app affected | Isolated         |
 | Complexity | Low initially      | High initially   |
 ```
+
 ```text
 Advantages:
    Independent deployment
@@ -37,6 +37,7 @@ Disadvantages:
    Distributed transactions
    Deployment complexity
 ```
+
 </details>
 </details>
 
@@ -59,18 +60,21 @@ Single Responsibility Principle
 Example:
   User Service should not handle orders.
 ```
+
 </details>
 
 <details>
 <summary>API Design Best Practices</summary>
 
- - API design best practices are guidelines to make APIs easy to use, consistent, scalable, and maintainable.
+- API design best practices are guidelines to make APIs easy to use, consistent, scalable, and maintainable.
+
 ```text
 RESTful APIs
 Versioning--> /api/v1/orders
 Idempotency
 Pagination
 ```
+
 <details>
 <summary>RESTful API</summary>
 
@@ -107,6 +111,7 @@ Interview One-Liner
 
 RESTful API = Stateless API that exposes resources using HTTP methods.
 ```
+
 ```text
 1. Use nouns, not verbs
     GET /orders        ✔
@@ -123,6 +128,7 @@ RESTful API = Stateless API that exposes resources using HTTP methods.
     | DELETE | Remove           |
 
 ```
+
 [http_methods_advanced_notes.md](subNotes/http_methods_advanced_notes.md)
 
 ```text
@@ -149,6 +155,7 @@ RESTful API = Stateless API that exposes resources using HTTP methods.
     /products
 
 ```
+
 </details>
 <details>
 <summary>Versioning</summary>
@@ -159,13 +166,14 @@ Versioning ensures backward compatibility when APIs change.
 1. URL Versioning (most common)
     /api/v1/orders
     /api/v2/orders
-    
+  
 2. Header Versioning
     Accept: application/vnd.company.v1+json
 
 3. Query Parameter
     /orders?version=1
 ```
+
 </details>
 <details>
 <summary>Idempotency</summary>
@@ -179,6 +187,7 @@ GET, put (updates whole obj),delete --> idempotent
 post and patch --> not idemopenent
 use Idempotency-Key: abc123 for retries
 ```
+
 </details>
 
 <details>
@@ -199,6 +208,7 @@ Example Response
   "data": [...]
 }
 ```
+
 ```text
 
 Types of Pagination
@@ -223,9 +233,9 @@ Instagram
 Interview Tip
 Cursor pagination is more scalable than offset.
 ```
-</details>
-</details>
 
+</details>
+</details>
 
 <details>
 <summary>Communication Between Microservices</summary>
@@ -244,7 +254,7 @@ java 11 both synchronous and asynchronous,
                 .GET()
                 .build();
 3. HttpResponse<String> response =
-                client.send(request, HttpResponse.BodyHandlers.ofString());          
+                client.send(request, HttpResponse.BodyHandlers.ofString());  
 asynchronous(Non-Blocking)
 
 1.client.sendAsync(request, HttpResponse.BodyHandlers.ofString())
@@ -280,6 +290,7 @@ OkHTTP
 
 Apache HttpClient
 ```
+
 </details>
 
 <details>
@@ -288,840 +299,116 @@ Apache HttpClient
 ```text
 
 ```
+
 </details>
 </details>
 
-<details>
-<summary>remove</summary>
 
-```text
-Designing Microservices
+---
 
-Communication
+# Data Consistency in microservices
 
-Data Management
+[data_consistency_microservices.md](data_consistency_microservices.md)
 
-Reliability & Resilience
+---
 
-Deployment & DevOps
+# Reliability & Resilience
 
-Observability & Production Concerns
+[microservices_reliability_resilience.md](microservices_reliability_resilience.md)
 
+[resilience4j_springboot_notes.md](resilience4j_springboot_notes.md)
 
 
+---
 
+# Service Discovery
 
+[service_discovery_notes.md](service_discovery_notes.md)
 
+Eureka
+Consul
+Kubernetes DNS
+---
+# API GATEWAY
 
+Responsibilities:
+ Routing
+ Authentication
+ Rate limiting
 
-3. Why Spring Boot is Popular in Microservices
+Tools:
+ Spring Cloud Gateway
+ Kong
+ Nginx
+---
+# Security in Microservices
 
-Important reasons:
-
-Embedded server
-
-Easy containerization
-
-Actuator
-
-External configuration
-
-Dependency management
-
-Spring Boot auto-configures components based on dependencies, reducing configuration overhead
-
-4. Common Mistakes Developers Do in Spring Boot (Real Production Issues)
-
-This is the part interviewers really like.
-
-Mistake 1: Using Stateful Services
-
-Wrong:
-
-@Service
-public class CounterService {
-int count = 0;
-}
-
-
+JWT Authentication
+OAuth2
+---
+# Configuration Management
 Problem:
-
-Multiple pods
-
-Each pod has different memory
-
-Data inconsistent
-
-Rule:
-Services must be stateless
-
-Mistake 2: In-memory Cache in Multiple Pods
-
-Wrong:
-
-Using HashMap cache inside service
-
-Problem:
-
-Pod1 cache != Pod2 cache
-
-Correct:
-
-Redis
-
-Distributed cache
-
-Mistake 3: No Connection Pool Tuning
-
-Default settings:
-
-HikariCP small pool
-
-Problem:
-
-DB bottleneck under load
-
-Correct:
-Tune:
-
-spring.datasource.hikari.maximum-pool-size
-
-Mistake 4: Logging Too Much
-
-Common issue:
-
-Logging request body
-
-Logging large JSON
-
-Problem:
-
-CPU spike
-
-Disk I/O
-
-In Kubernetes:
-
-Logs shipped to ELK
-
-Cost increases
-
-Mistake 5: Not Using Timeouts
-
-Big production bug:
-
-restTemplate.getForObject()
-
-
-Without timeout:
-
-Thread hangs
-
-Pod freezes
-
-Correct:
-Always configure:
-
-connect timeout
-
-read timeout
-
-Mistake 6: Not Handling Retry & Circuit Breaker
-
-In microservices:
-
-Downstream service fails
-
-Threads pile up
-
-Correct:
-Use:
-
-Resilience4j
-
-Retry
-
-Circuit breaker
-
-Mistake 7: Large Fat Jar and Slow Startup
-
-Problem:
-
-Pod restart slow
-
-Kubernetes autoscaling slow
+Multiple services, different configs.
 
 Solution:
-
-Native image
-
-Layered Docker images
-
-Spring Boot 3 improved startup and memory footprint for containers
-
-Mistake 8: Not Externalizing Config
-
-Wrong:
-
-application.properties inside jar
-
-
-Correct:
-
-ConfigMap
-
-Secrets
-
-Mistake 9: Ignoring Health Checks
-
-Production issue:
-
-Pod unhealthy but traffic routed
-
-Correct:
-
-readiness probe
-
-liveness probe
-
-actuator health
-
-Mistake 10: Using Blocking Calls Everywhere
-
-Bad:
-
-RestTemplate heavy usage
-
-Slow downstream
-
-Better:
-
-WebClient
-
-Async
-
-5. Mistakes Specifically in Multiple Pods (Important)
-
-This is very interview-relevant.
-
-Problem	Why Happens	Fix
-Duplicate processing	Multiple pods consume same event	Distributed locks
-Session loss	Stateful app	Use JWT or Redis
-Cache inconsistency	Local cache	Distributed cache
-Race conditions	Multiple writers	DB constraints
-Thread pool exhaustion	Blocking calls	Async / tuning
-6. Golden Rules for Microservices with Spring Boot
-
-Memorize this:
-
-Stateless services
-
-External configuration
-
-Distributed cache
-
-Timeout + retry
-
-Health checks
-
-Observability (metrics + logs)
-
-If you say these in interview → strong impression.
-
-7. What Interviewers Actually Expect You to Know
-
-Most important topics:
-
-Actuator
-
-Profiles
-
-ConfigMap usage
-
-Connection pooling
-
-Thread pools
-
-RestTemplate vs WebClient
-
-Circuit breaker
-
-Not version history.
-
-If You Want to Really Stand Out (High-Level Interview Question)
-
-I can explain:
-
-What really breaks when you scale Spring Boot from 1 pod → 10 pods
-
-This is one of the strongest real-world interview topics for backend engineers.
-
-yes please
-
-When a Spring Boot service runs on 1 pod, many problems are hidden.
-When you scale to 5–10 pods, real distributed-system issues appear.
-
-Here are the most common things that break, explained in a practical way.
-
-What Breaks When You Scale Spring Boot from 1 Pod → Multiple Pods
-1. Session Breaks (Login Problems)
-   What works in 1 pod
-
-User logs in → session stored in memory → works fine.
-
-What breaks in multiple pods
-
-Request 1 → Pod A
-Request 2 → Pod B
-
-Pod B does not have the session → user logged out.
-
-Fix
-
-Use:
-
-JWT (best for microservices)
-
-Redis session store
-
-2. In-Memory Cache Becomes Wrong
-   What works in 1 pod
-   Map<Long,User> cache = new HashMap<>();
-
-What breaks in multiple pods
-
-Pod A cache ≠ Pod B cache
-
-Different results returned.
-
-Fix
-
-Use:
-
-Redis
-
-Hazelcast
-
-Distributed cache
-
-3. Duplicate Processing (Very Common Production Bug)
-   Scenario
-
-Multiple pods consume events or process jobs.
-
-Example:
-
-Two pods pick the same order
-
-Order processed twice
-
-Fix
-
-Use:
-
-DB unique constraints
-
-Distributed locks
-
-Message queues with proper acknowledgment
-
-4. Race Conditions in Database
-   Example
-
-Two pods booking same slot:
-
-Pod A → slot available
-Pod B → slot available
-
-Both book.
-
-Fix
-
-Use:
-
-Optimistic locking
-
-Version column
-
-Unique constraints
-
-Very common interview scenario (doctor slot booking like your project).
-
-5. Connection Pool Exhaustion
-   What works in 1 pod
-
-Default pool = 10 connections
-
-What breaks
-
-10 pods × 10 connections = 100 DB connections
-DB crashes or slows.
-
-Fix
-
-Tune:
-
-maximum-pool-size
-
-
-Also:
-
-Use PgBouncer or proxy
-
-6. Logging Explosion
-   What works in 1 pod
-
-Logs manageable.
-
-What breaks
-
-10 pods:
-
-Disk fills
-
-ELK cost increases
-
-CPU usage spikes
-
-Fix
-
-Structured logging
-
-Log only necessary data
-
-7. Health Checks Not Configured
-   What happens
-
-Pod is slow but still receiving traffic.
-
-Users see:
-
-timeouts
-
-errors
-
-Fix
-
-Use Actuator:
-
-readiness
-
-liveness
-
-Kubernetes stops routing traffic.
-
-8. Thread Pool Exhaustion
-   What works in 1 pod
-
-Blocking calls are fine.
-
-What breaks
-
-High traffic:
-
-Threads blocked
-
-Requests pile up
-
-Fix
-
-Timeout
-
-Async processing
-
-WebClient
-
-9. Configuration Problems
-   What works in 1 pod
-
-Hardcoded configs.
-
-What breaks
-
-Different environments:
-
-Dev
-
-QA
-
-Prod
-
-Fix
-
-Use:
-
-ConfigMap
-
-Secrets
-
-Profiles
-
-10. Startup Time Becomes a Problem
-    What works
-
-Pod restart takes 40 seconds.
-
-What breaks
-
-Autoscaling slow.
-
-Fix
-
-Layered Docker images
-
-Lazy initialization
-
-Native image
-
-11. Load Balancing Issues
-
-Without:
-
-Sticky sessions
-
-Proper readiness probes
-
-Traffic gets routed to:
-
-Starting pods
-
-Unhealthy pods
-
-12. Distributed Transactions Assumptions
-
-Developers assume:
-
-One service = one DB transaction
-
-In microservices:
-
-Network failures happen
-
-Partial failure happens
-
-Fix:
-
-Saga pattern
-
-Idempotency
-
-Simple Mental Model (Very Important)
-
-When scaling pods, these 4 things break:
-
-Memory
-
-Threads
-
-Database
-
-Network
-
-Memorize this — very useful in interviews.
-
-Golden Rule of Microservices
-
-Never rely on:
-
-Local memory
-
-Local cache
-
-Local session
-
-Local files
-
-Pods are stateless and disposable.
-
-Interview-Level Answer (Short Version)
-
-If interviewer asks:
-What changes when scaling from 1 pod to multiple pods?
-
-Answer:
-
-Problems arise with session management, caching, concurrency, and distributed coordination. Applications must be stateless, use distributed caches, implement proper connection pooling, and handle race conditions and retries.
-
-One Real-World Example (Good for Interviews)
-
-Doctor appointment booking system:
-
-If two pods:
-
-Both see slot available
-
-Both book
-
-Solution:
-
-Unique constraint on slot_id + time
-
-Optimistic locking
-
-Interviewers love this example.
-
-If You Want to Go One Level Stronger (Senior-Level Knowledge)
-
-I can explain:
-
-The 7 production mistakes Spring Boot developers make in Kubernetes that cause outages
-
-This is something even experienced engineers often miss.
-
-yes
-
-Here are 7 real production mistakes Spring Boot developers make in Kubernetes that often cause outages. These are practical, interview-level and also useful in real projects.
-
-7 Production Mistakes That Cause Outages (Spring Boot + Kubernetes)
-1. No Timeouts on External Calls
-   Problem
-
-Developers call:
-
-RestTemplate / WebClient
-DB calls
-Other microservices
-
-
-without proper timeouts.
-
-If a downstream service hangs:
-
-Threads block
-
-Tomcat thread pool fills
-
-Pod stops responding
-
-Kubernetes restarts pod
-
-Fix
-
-Always configure:
-
-connection timeout
-
-read timeout
-
-circuit breaker
-
-Golden rule:
-Every network call must have a timeout.
-
-2. Wrong Thread Pool Configuration
-   Problem
-
-Spring Boot default thread pool works in low traffic but fails in production.
-
-Symptoms:
-
-Requests stuck
-
-High response time
-
-CPU low but system slow
-
-Reason:
-Thread pool exhausted.
-
-Fix
-
-Tune:
-
-server.tomcat.threads.max
-spring.task.execution.pool.max-size
-
-
-And monitor thread metrics.
-
-3. Not Configuring Readiness and Liveness Probes
-   Problem
-
-Kubernetes sends traffic to a pod that:
-
-is still starting
-
-DB not connected
-
-cache not loaded
-
-Users get errors.
-
-Fix
-
-Use Actuator:
-
-/actuator/health/readiness
-/actuator/health/liveness
-
-
-This is mandatory in production.
-
-4. Connection Pool Misconfiguration (Very Common)
-   Problem
-
-Each pod opens DB connections.
-
-Example:
-
-Pool size = 20
-
-Pods = 10
-
-Total = 200 connections
-
-DB crashes.
-
-Fix
-
-Tune HikariCP:
-
-spring.datasource.hikari.maximum-pool-size
-
-
-Rule:
-Connection pool × pods ≤ DB max connections
-
-5. Using In-Memory State
-   Problem
-
-Developers store:
-
-cache in HashMap
-
-session in memory
-
-counters in fields
-
-With multiple pods:
-
-inconsistent data
-
-random behavior
-
-Fix
-
-Use:
-
-Redis
-
-DB
-
-Distributed cache
-
-JWT for sessions
-
-Golden rule:
-Pods must be stateless.
-
-6. Logging Too Much (Hidden Production Killer)
-   Problem
-
-Logging:
-
-full request body
-
-large JSON
-
-debug logs in production
-
-Result:
-
-CPU spikes
-
-disk I/O heavy
-
-ELK cost increases
-
-pods slow down
-
-Fix
-
-Use:
-
-INFO or WARN
-
-structured logging
-
-avoid large payload logs
-
-7. Not Handling Pod Restarts Properly
-   Problem
-
-Kubernetes can restart pods anytime:
-
-deployment
-
-scaling
-
-node restart
-
-If application:
-
-doesn't retry
-
-doesn't handle transient failures
-
-Users see errors.
-
-Fix
-
-Use:
-
-retry logic
-
-idempotency
-
-graceful shutdown
-
-Enable:
-
-server.shutdown=graceful
-
-Bonus Mistake (Very Important in Interviews)
-Duplicate Processing in Multiple Pods
-
-Scenario:
-Two pods process same message or job.
-
-Result:
-
-duplicate payments
-
-duplicate orders
-
-Fix:
-
-unique constraints
-
-distributed locks
-
-message queues with acknowledgments
-
-Mental Model to Remember (Interview Gold)
-
-When scaling pods, failures come from:
-
-Threads
-
-Database
-
-Network calls
-
-State management
-
-If you say this in an interview, it shows real production understanding.
-
-One Strong Interview Answer (Memorize This)
-
-If interviewer asks:
-
-What are common issues when running Spring Boot in Kubernetes?
-
-Answer:
-
-Common issues include missing timeouts, connection pool misconfiguration, lack of readiness probes, improper thread pool tuning, storing state in memory, excessive logging, and not handling pod restarts or retries properly.
-
-That answer sounds very strong and practical.
-```
-</details>
+  Config Server
+Tools:
+  Spring Cloud Config
+  Kubernetes ConfigMaps
+---
+# Deployment & Containerization
+
+- Docker
+[docker_complete_notes.md](docker_complete_notes.md)
+- Kubernetes
+
+[kubernetes_complete_notes.md](kubernetes_complete_notes.md)
+
+Build Jar → Docker Image → Kubernetes Deployment
+
+Kubernetes handles:
+Scaling
+Restart
+Load balancing
+---
+# Load Balancing
+
+Types:
+Client Side:
+Ribbon (old)
+Spring Cloud LoadBalancer
+
+Server Side:
+Nginx
+Kubernetes Service
+gslb
+
+---
+# Observability (Production Systems)
+
+Very important in real systems.
+
+Logging
+Centralized logging:
+ELK Stack
+Monitoring
+Prometheus
+Grafana
+Distributed Tracing
+Zipkin
+Jaeger
+Helps trace:
+
+Request → Gateway → Order → Payment
+
+---
+# CI/CD in Microservices
+
+Pipeline:
+
+Code → Build → Test → Docker → Deploy
+
+Tools:
+Jenkins
+GitHub Actions
+ArgoCD
