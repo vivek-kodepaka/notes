@@ -108,6 +108,8 @@ metadata:
   name: db-purge-job
 spec:
   schedule: "0 2 * * *"
+  startingDeadLineSeconds:200    // 2 min
+  activatedDeadLineSeconds:600   //10min
   jobTemplate:
     spec:
       template:

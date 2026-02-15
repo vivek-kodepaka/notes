@@ -44,7 +44,10 @@ Function on indexed column prevents index seek
 
 
 ```
-![img.png](images/img.png)
-![img_1.png](images/img_1.png)
-![img_2.png](images/img_2.png)
+[DB_Purge_Project_Extended.md](projectsnotes/DB_Purge_Project_Extended.md)
+
+<img src="images/img.png" width="400">
+<img src="images/img_1.png" width="400">
+<img src="images/img_2.png" width="400">
+
 </details>
