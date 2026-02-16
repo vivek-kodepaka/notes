@@ -1,0 +1,1 @@
+- DATEADD(DAY, -30, GETDATE())
