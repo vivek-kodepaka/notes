@@ -24,41 +24,82 @@
 # 2. Stored Procedure -- Sample Structure
 
 ``` sql
-CREATE PROCEDURE usp_purge_oa_tables_with_facility_nbr_with_limit
-    @FacilityNbr INT,
-    @RetentionDays INT,
-    @BatchSize INT
+CREATE OR ALTER PROCEDURE [dbo].[usp_purge_oa_tables_with_facility_nbr_with_limit]
+    @TableName       VARCHAR(500),   -- Table to delete from
+    @RetentionDays   INT,            -- How old data must be to delete
+    @BatchSize       INT = 1000,     -- Number of rows to delete per batch
+    @FacilityNbr     INT,            -- Facility number filter
+    @Condition       VARCHAR(500) = '' -- Extra condition if needed
 AS
 BEGIN
     SET NOCOUNT ON;
 
-    DECLARE @RetentionDate DATETIME;
-    SET @RetentionDate = DATEADD(DAY, -@RetentionDays, GETDATE());
+    DECLARE @loop         BIT = 1;
+    DECLARE @iteration    INT = 1;
+    DECLARE @rowcount     INT = 0;
+    DECLARE @days         INT;
+    DECLARE @tblname      VARCHAR(500) = @TableName;
+    DECLARE @sqlDelCommand NVARCHAR(2048);
 
-    BEGIN TRY
-        WHILE (1 = 1)
-        BEGIN
-            BEGIN TRAN;
+    -- Make retention negative so DATEADD works properly
+    SET @days = -@RetentionDays;
 
-            DELETE TOP (@BatchSize)
-            FROM OrdersTable
-            WHERE FacilityNbr = @FacilityNbr
-              AND Create_Ts < @RetentionDate;
+    WHILE (@loop = 1 AND @iteration <= @BatchSize)
+    BEGIN
+        BEGIN TRY
+            BEGIN TRANSACTION;
 
-            IF @@ROWCOUNT = 0
-            BEGIN
-                COMMIT;
-                BREAK;
-            END
+            SET @sqlDelCommand = 
+                 'DELETE TOP (' + CAST(@BatchSize AS VARCHAR(10)) + ') '
+               + 'FROM ' + @tblname
+               + ' WHERE facility_nbr = ' + CAST(@FacilityNbr AS VARCHAR(10))
+               + ' AND create_ts < DATEADD(DAY, ' + CAST(@days AS VARCHAR(10)) + ', GETDATE()) '
+               + @Condition;
 
-            COMMIT;
-        END
-    END TRY
-    BEGIN CATCH
-        ROLLBACK;
-        RAISERROR('Purge Failed', 16, 1);
-    END CATCH
+            PRINT @sqlDelCommand;
+
+            EXEC sp_executesql @sqlDelCommand;
+
+            SET @rowcount = @@ROWCOUNT;
+            SET @iteration = @iteration + 1;
+
+            IF (@rowcount = 0 OR @rowcount < @BatchSize)
+                SET @loop = 0;
+
+            COMMIT TRANSACTION;
+        END TRY
+        BEGIN CATCH
+            -- Something went wrong, stop loop
+            SET @loop = 0;
+
+            DECLARE @ErrorMessage   NVARCHAR(4000),
+                    @ErrorSeverity  INT,
+                    @ErrorState     INT;
+
+            SELECT 
+                @ErrorMessage  = ERROR_MESSAGE(),
+                @ErrorSeverity = ERROR_SEVERITY(),
+                @ErrorState    = ERROR_STATE();
+
+            -- Rethrow original error so calling system knows failure reason
+            RAISERROR (
+                @ErrorMessage,
+                @ErrorSeverity,
+                @ErrorState
+            );
+
+            ROLLBACK TRANSACTION;
+        END CATCH
+    END
 END
+
+```
+
+```sql
+EXECUTE (dbo].(usp_purge oa_tables_with_facility_nbr_with_limit] alloc_order obd, 90,1000, 8801, 5000, 'and facility_cntry_code in ('MX','mx')'
+EXECUTE [dbo].(usp_purge_oa_tables mith_facility_nbr_with_ Limit] container distribution, 90, 1000, 8801, 5000, 'and facility_cntry_code in ('MX'', 'Mx')'
+EXECUTE [dbo].[usp purge oa tables_with facility nbr with limit] alloc_order pick_opv, 90, 1000, 8801, 3000, 'and facility_cntry_code in ('MX', 'mx')'
+EXECUTE [dbo].[usp_purge oa tables_with facility_nbr with limit] alloc process_status, 90, 1000, 8801, 1000, 'and facility_cntry_code in ('MX','mx')'
 ```
 
 ## Key Concepts Used
@@ -102,32 +143,73 @@ EXEC sp_executesql @Sql,
 ## Sample YAML Structure
 
 ``` yaml
-apiVersion: batch/v1
-kind: CronJob
-metadata:
-  name: db-purge-job
-spec:
-  schedule: "0 2 * * *"
-  startingDeadLineSeconds:200    // 2 min
-  activatedDeadLineSeconds:600   //10min
-  jobTemplate:
-    spec:
-      template:
-        spec:
-          containers:
-            - name: purge-container
-              image: purge-image:latest
-              env:
-                - name: DB_CONNECTION
-                  valueFrom:
-                    secretKeyRef:
-                      name: db-secret
-                      key: connectionString
-              resources:
-                limits:
-                  memory: "512Mi"
-                  cpu: "500m"
-          restartPolicy: OnFailure
+profiles:
+  - cronjob
+
+notify:
+  slack:
+    channelName: wcnp-intl-db-purge
+  msTeams:
+    channelId: "19%3Aa97dd4f165d94d3fa5f09e1c0b53cb4a%40thread.tacv2"
+
+artifact: oa-perish-purge
+
+deploy:
+  namespace: atlas-op-mx
+  stages:
+    - name: stg-cell033
+      approvers:
+        groups:
+          - FLEXPLUS
+          - OP
+      target:
+        cluster_id: uscentral-stage-wut-003
+      refs: 
+        - "main"
+      helm:
+        values:
+          secrets:
+            akeyless: true
+          engine: eso
+          config:
+            akeyless:
+              path: |
+                WCNP:Prod/wcip/homeoffice/FLEXPLUS_OP/allocation-order-service-purge
+                DPS:Non-Prod/DPS/homeoffice/FLEXPLUS_OP
+            addr: "https://akeyless.gw.prod.glb.us.walmart.net:8080/v2"
+
+      cronJobs:
+        - cronJobName: allocation-db-purge-stg-cel1033
+          schedule: "30 5 * * *"   # Run every day at 05:30 UTC
+          startingDeadlineSeconds: 200
+          activeDeadlineSeconds: 600
+          concurrencyPolicy: Forbid
+          secrets:
+            akeyless: true
+
+      files:
+        - destination: dbconfig.json
+          content: purge.config
+          resources:
+            limits:
+              cpu: "0.1"
+              memory: "256Mi"
+            requests:
+              cpu: "0.1"
+              memory: "256Mi"
+
+      metadata:
+        labels:
+          wm.app: ATLAS-INTL-DB-PURGE
+          wm.env: stg-cel1033
+
+      postDeploy:
+        task:
+          name: Allocation Order Service Purge MX stg-cell033
+          type: deployApp
+          kittFilepath: kitt-config/allocation-order-service/stages/allocation-order-service-cell033-prod.yml
+          tag: "branch:'($.kitt.build.commitEvent.currentBranch)P'"
+
 ```
 
 ## YAML Explanation
