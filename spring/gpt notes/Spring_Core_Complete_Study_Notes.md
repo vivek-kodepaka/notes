@@ -1,34 +1,55 @@
 # Spring Core Complete Notes (Full Session Summary)
 
 ------------------------------------------------------------------------
+<details>
+<summary><h3>1. Why Spring (IoC Concept)</h3></summary>
 
-# 1. Why Spring (IoC Concept)
+```text
+Traditional Java: 
+  - Classes create dependencies using `new` 
+  - Tight coupling 
+  - Violates Open/Closed Principle 
+  - Hard to swap implementations
 
-Traditional Java: - Classes create dependencies using `new` - Tight
-coupling - Violates Open/Closed Principle - Hard to swap implementations
-
-Spring Solution: - Inversion of Control (IoC) - Container creates and
-injects objects - Loose coupling - Centralized lifecycle management
+Spring Solution: 
+  - Inversion of Control (IoC) 
+  - Container creates and injects objects 
+  - Loose coupling 
+  - Centralized lifecycle management
 
 Flow: Container → creates bean → injects into dependent class
+```
+</details>
+
+
+
 
 ------------------------------------------------------------------------
+<details>
+<summary><h3>2. IoC Container</h3></summary>
 
-# 2. IoC Container
+```text
+Two core interfaces: 
 
-Two core interfaces: - BeanFactory (lazy by default) -
-ApplicationContext (eager singleton initialization)
+    - BeanFactory (lazy by default) -
+    - ApplicationContext (eager singleton initialization)
 
 Important: Spring first creates **BeanDefinition (metadata)**, not
 objects.
 
 BeanDefinition contains: - Class type - Scope - Constructor details -
 Init & destroy methods - Lazy flag - Qualifiers
+```
+</details>
+
+
+
 
 ------------------------------------------------------------------------
+<details>
+<summary><h3>3. Bean Lifecycle (Correct Order)</h3></summary>
 
-# 3. Bean Lifecycle (Correct Order)
-
+```text
 1.  BeanDefinition registration
 2.  Bean instantiation (constructor)
 3.  Dependency injection
@@ -42,6 +63,30 @@ Init & destroy methods - Lazy flag - Qualifiers
     here
 8.  Bean ready for use
 9.  Destroy phase (@PreDestroy)
+```
+
+<details>
+<summary>beanDefinition</summary>
+
+```text
+BeanDefinition
+ ├── beanClassName
+ ├── scope
+ ├── constructorArgs
+ ├── propertyValues
+ ├── lazyInit
+ ├── dependsOn
+ ├── initMethod
+ ├── destroyMethod
+ ├── autowireMode
+ └── factoryMethodName
+
+```
+</details>
+</details>
+
+
+
 
 ------------------------------------------------------------------------
 
