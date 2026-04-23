@@ -466,4 +466,86 @@ public class StudentCSV {
         return fileItemReader;
     }
 ```
+
+2. CSV Item Reader
+
+```java
+  @Bean
+    public Job jsonChunkJob(){
+        return jobBuilderFactory.get("jsonChunkJob")
+                .incrementer(new RunIdIncrementer())
+                .start(jsonChunkStep())
+                .build();
+    }
+
+    @Autowired
+    JsonItemWriter jsonItemWriter;
+    private Step jsonChunkStep() {
+        return stepBuilderFactory.get("jsonChunkStep")
+                .<StudentJson,StudentJson>chunk(3)
+                .reader(jsonItemReader(null))
+                .writer(jsonItemWriter)
+                .build();
+    }
+
+    @Bean
+    @StepScope
+    public JsonItemReader<StudentJson> jsonItemReader(
+            @Value("#{jobParameters[jsonFile]}") FileSystemResource fileSystemResource
+    ){
+
+        JsonItemReader<StudentJson> jsonItemReader = new JsonItemReader<>();
+        jsonItemReader.setResource(fileSystemResource);
+
+        jsonItemReader.setJsonObjectReader(new JacksonJsonObjectReader<>(StudentJson.class));
+        jsonItemReader.setMaxItemCount(30);//max 30 items will return
+        jsonItemReader.setCurrentItemCount(10);//skip first 10 
+        return jsonItemReader;
+    }
+```
+
+3. xml
+```java
+@XmlRootElement(name = "user")
+public class UserXml {
+    private int id;
+    private String firstName;
+    private String lastName;
+    private String email;
+}
+```
+
+```java
+@Bean
+    public Job xmlChunkJob(){
+        return jobBuilderFactory.get("xmlChunkJob")
+                .incrementer(new RunIdIncrementer())
+                .start(xmlChunkStep())
+                .build();
+    }
+    @Autowired
+    XmlItemWriter xmlItemWriter;
+
+    public Step xmlChunkStep(){
+        return stepBuilderFactory.get("xmlChunkStep")
+                .<UserXml,UserXml>chunk(3)
+                .reader(xmlItemReader())
+                .writer(xmlItemWriter)
+                .build();
+    }
+
+    public StaxEventItemReader<UserXml> xmlItemReader(){
+        StaxEventItemReader<UserXml>  xmlXmlItemWriter = new StaxEventItemReader<>();
+
+        xmlXmlItemWriter.setResource(
+                new FileSystemResource("C:\\Users\\kodep\\IdeaProjects\\spring-batch-demo\\inputFiles\\users.xml"));
+
+        xmlXmlItemWriter.setFragmentRootElementName("user");
+        Jaxb2Marshaller marshaller = new Jaxb2Marshaller();
+        marshaller.setClassesToBeBound(UserXml.class);
+        xmlXmlItemWriter.setUnmarshaller(marshaller);
+        return xmlXmlItemWriter;
+
+    }
+```
 </details>
